@@ -1,9 +1,8 @@
 const canvas = document.querySelector("canvas");
+const context = canvas.getContext("2d");
 
 canvas.setAttribute("width", 500);
 canvas.setAttribute("height", 500);
-
-const context = canvas.getContext("2d");
 
 const gradientMap = {};
 
