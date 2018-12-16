@@ -76,8 +76,7 @@ const noise2d = (x, y) => {
 
     const value = (avg * 0.5 + 0.5) * 255;
 
-    context.fillStyle = `rgb(${value},${value},${value})`;
-    context.fillRect(x * 100, y * 100, 1, 1);
+    return value;
 };
 
 const onDraw = () => {
@@ -87,18 +86,14 @@ const onDraw = () => {
 
             const x = i / 100;
             const y = j / 100;
+            const value = noise2d(x, y);
 
-            context.fillStyle = noise2d(x, y);
-            //   context.fillRect(i, j, 1, 1);
+            context.fillStyle = `rgb(${value},${value},${value})`;
+            context.fillRect(x * 100, y * 100, 1, 1);
         }
     }
 
-    //   requestAnimationFrame(onDraw);
+    requestAnimationFrame(onDraw);
 };
 
 onDraw();
-
-console.log(gradientMap);
-
-// noise2d(0.1, 0.1);
-// noise2d(1.1, 0.1);
