@@ -7,17 +7,35 @@ const context = canvas.getContext("2d");
 
 const gradientMap = {};
 
-const gradient = ([x, y]) => {
-    const key = `${parseInt(x)}, ${parseInt(y)}`;
-    if (!gradientMap[key]) {
+const gradient = ([x, y], phase) => {
 
-        //const g = [Math.sin((x + 2) * 1.7), Math.cos((y + 3) * 5.7)];
+    const frac = phase - parseInt(phase);
+    const phaseKey0 = parseInt(phase) % 5;
+    const phaseKey1 = parseInt(phase + 1) % 5;
+
+    const key0 = `${parseInt(x)}, ${parseInt(y)}, ${phaseKey0}`;
+    const key1 = `${parseInt(x)}, ${parseInt(y)}, ${phaseKey1}`;
+
+    if (!gradientMap[key0]) {
         const g = [Math.random(), Math.random()].map(d => d * 2 - 1);
-
-        gradientMap[key] = g;
+        gradientMap[key0] = g;
     }
 
-    return gradientMap[key];
+    if (!gradientMap[key1]) {
+        const g = [Math.random(), Math.random()].map(d => d * 2 - 1);
+        gradientMap[key1] = g;
+    }
+
+    return [
+        lerp(gradientMap[key0][0], gradientMap[key1][0], frac),
+        lerp(gradientMap[key0][1], gradientMap[key1][1], frac),
+        lerp(gradientMap[key0][2], gradientMap[key1][2], frac)
+    ];
+};
+
+const lerp = (a, b, s) => {
+
+    return (b - a) * s + a;
 };
 
 const normalize = (v) => {
@@ -42,7 +60,7 @@ const ease = (x, x0) => {
     return 3.0 * Math.pow(x - x0, 2.0) - 2.0 * Math.pow(x - x0, 3.0);
 };
 
-const noise2d = (x, y) => {
+const noise2d = (x, y, phase = 0) => {
 
     const ix = Math.floor(x);
     const iy = Math.floor(y);
@@ -53,10 +71,10 @@ const noise2d = (x, y) => {
     const cBL = [ix + 0, iy + 1];
     const cBR = [ix + 1, iy + 1];
 
-    const gTL = normalize(gradient(cTL));
-    const gTR = normalize(gradient(cTR));
-    const gBL = normalize(gradient(cBL));
-    const gBR = normalize(gradient(cBR));
+    const gTL = normalize(gradient(cTL, phase));
+    const gTR = normalize(gradient(cTR, phase));
+    const gBL = normalize(gradient(cBL, phase));
+    const gBR = normalize(gradient(cBR, phase));
 
     const vTL = sub(sample, cTL);
     const vTR = sub(sample, cTR);
@@ -79,14 +97,16 @@ const noise2d = (x, y) => {
     return value;
 };
 
+let t = 0;
+
 const onDraw = () => {
 
-    for (var i = 0; i < 500; i++) {
-        for (var j = 0; j < 500; j++) {
+    for (var i = 0; i < 200; i++) {
+        for (var j = 0; j < 200; j++) {
 
             const x = i / 100;
             const y = j / 100;
-            const value = noise2d(x, y);
+            const value = noise2d(x, y, t);
 
             context.fillStyle = `rgb(${value},${value},${value})`;
             context.fillRect(x * 100, y * 100, 1, 1);
@@ -94,6 +114,7 @@ const onDraw = () => {
     }
 
     requestAnimationFrame(onDraw);
+    t += 0.1;
 };
 
 onDraw();
